@@ -19,7 +19,7 @@ class SplashView extends StatefulWidget {
 class _SplashViewState extends State<SplashView> {
   @override
   void initState() {
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
+    //  SystemChrome.setEnabledSystemUIMode(SystemUiMode.);
     super.initState();
   }
 
@@ -37,7 +37,6 @@ class _SplashViewState extends State<SplashView> {
                   if (state.isUserLoggedin) {
                     Navigator.of(context).pushReplacementNamed(Routes.home);
                   } else {
-                    debugPrint('navigate');
                     Navigator.of(context).pushReplacementNamed(Routes.home);
                   }
                 } else if (state is SplashErrorState) {

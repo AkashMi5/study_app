@@ -17,9 +17,11 @@ class CreateTestBloc extends Bloc<CreateTestEvent, CreateTestState> {
           List<Topic> topics = await testTopicRepository.getTopics();
           emit(TopicsFetchedState(topics: topics));
         } else if (event is CheckboxValueChangedEvent) {
-          debugPrint('bloc ${event.topics[0].topicCheckboxValue}');
           emit(CheckboxValueChangedState(topics: event.topics));
           emit(TopicsFetchedState(topics: event.topics));
+        } else if (event is TestNameChangeEvent) {
+          emit(TestNameChangeState(
+              testName: event.testName, topics: event.topics));
         } else {
           emit(CreateTestErrorState('Something went wrong!'));
         }

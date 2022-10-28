@@ -3,7 +3,9 @@ import 'package:study_app/screens/create_test/bloc/create_test_bloc.dart';
 import 'package:study_app/screens/create_test/bloc/create_test_event.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:study_app/screens/create_test/bloc/create_test_state.dart';
+import 'package:study_app/models/study_test.dart';
 import 'package:study_app/screens/create_test/models/topics.dart';
+import 'package:study_app/widgets/buttons.dart';
 
 class CreateTestView extends StatefulWidget {
   const CreateTestView({Key? key}) : super(key: key);
@@ -13,6 +15,8 @@ class CreateTestView extends StatefulWidget {
 }
 
 class _CreateTestState extends State<CreateTestView> {
+  String testName = '';
+  List<Topic> studyTopics = [];
   @override
   Widget build(BuildContext context) {
     double cHeight = MediaQuery.of(context).size.height;
@@ -22,71 +26,136 @@ class _CreateTestState extends State<CreateTestView> {
             CreateTestBloc()..add(CreateTestLoadingEvent()),
         child: BlocListener<CreateTestBloc, CreateTestState>(
             listener: (context, state) {
-          //listen to one time events
+          if (state is TestNameChangeState) {
+            testName = state.testName;
+          }
         }, child: BlocBuilder<CreateTestBloc, CreateTestState>(
                 builder: (context, state) {
-          return Scaffold(
-              body: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-            child: Container(
-              height: cHeight,
-              child: Column(
-                children: [
-                  SizedBox(
-                    height: 10,
-                    width: cWidth,
-                  ),
-                  Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: const [
-                        Icon(
-                          Icons.arrow_back,
-                          color: Colors.blue,
-                        ),
-                        Text('Create New Test'),
-                        SizedBox(
-                          width: 1,
-                        )
-                      ]),
-                  const SizedBox(
-                    height: 30,
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          if (state is TopicsFetchedState) {
+            studyTopics = state.topics;
+          } else if (state is CheckboxValueChangedState) {
+            studyTopics = state.topics;
+          }
+          return SafeArea(
+            child: Scaffold(
+                // resizeToAvoidBottomInset: false,
+                body: SingleChildScrollView(
+              child: GestureDetector(
+                onTap: () {
+                  FocusScopeNode currentFocus = FocusScope.of(context);
+                  if (!currentFocus.hasPrimaryFocus) {
+                    currentFocus.unfocus();
+                  }
+                },
+                child: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                  child: SizedBox(
+                    height: cHeight,
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const TestNameField(),
+                        SizedBox(
+                          height: 10,
+                          width: cWidth,
+                        ),
+                        Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              GestureDetector(
+                                onTap: () {
+                                  Navigator.of(context).pop();
+                                },
+                                child: const Icon(
+                                  Icons.arrow_back,
+                                  color: Colors.blue,
+                                ),
+                              ),
+                              const Text('Create New Test'),
+                              const SizedBox(
+                                width: 1,
+                              )
+                            ]),
                         const SizedBox(
                           height: 30,
                         ),
-                        const Text('Topics',
-                            style: TextStyle(
-                                fontSize: 18, color: Colors.blueAccent)),
-                        const SizedBox(
-                          height: 30,
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Center(
+                                child: TestNameField(
+                                    state: state, topics: studyTopics),
+                              ),
+                              const SizedBox(
+                                height: 30,
+                              ),
+                              const Text('Topics',
+                                  style: TextStyle(
+                                      fontSize: 18, color: Colors.blueAccent)),
+                              const SizedBox(
+                                height: 15,
+                              ),
+                              if (state is TopicsFetchedState)
+                                SizedBox(
+                                    height: cHeight * 0.5,
+                                    child: TopicList(topics: state.topics))
+                              else if (state is CheckboxValueChangedState)
+                                SizedBox(
+                                    height: cHeight * 0.5,
+                                    child: TopicList(topics: state.topics))
+                              else if (state is TestNameChangeState)
+                                SizedBox(
+                                    height: cHeight * 0.5,
+                                    child: TopicList(topics: state.topics))
+                              else if (state is CreateTestLoadingState)
+                                SizedBox(
+                                  height: cHeight * 0.5,
+                                  child: const Center(
+                                    child: SizedBox(
+                                      height: 30.0,
+                                      width: 30.0,
+                                      child: CircularProgressIndicator(
+                                        color: Colors.blueAccent,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              const SizedBox(
+                                height: 30,
+                              ),
+                              Center(
+                                child: ConfirmButton(
+                                  isActive: testName.length > 4 ? true : false,
+                                  buttonText: 'Create',
+                                  onTap: () {
+                                    StudyTest newtest = StudyTest(
+                                        testName: testName,
+                                        dateTime: DateTime.now());
+                                    Navigator.pop(context, newtest);
+                                  },
+                                ),
+                              )
+                            ],
+                          ),
                         ),
-                        if (state is TopicsFetchedState)
-                          Container(
-                              height: cHeight * 0.6,
-                              child: TopicList(topics: state.topics))
-                        else if (state is CheckboxValueChangedState)
-                          Container(
-                              height: cHeight * 0.6,
-                              child: TopicList(topics: state.topics))
                       ],
                     ),
                   ),
-                ],
+                ),
               ),
-            ),
-          ));
+            )),
+          );
         })));
   }
 }
 
 class TestNameField extends StatefulWidget {
-  const TestNameField({Key? key}) : super(key: key);
+  const TestNameField({Key? key, required this.state, required this.topics})
+      : super(key: key);
+
+  final CreateTestState state;
+  final List<Topic> topics;
 
   @override
   State<TestNameField> createState() => _TestNameFieldState();
@@ -131,10 +200,16 @@ class _TestNameFieldState extends State<TestNameField> {
                   fontFamily: 'GilroySemiBold',
                   fontSize: 18.0),
               controller: _testNameController,
-              onChanged: (val) => _testNameController
-                ..text = val
-                ..selection = TextSelection.collapsed(
-                    offset: _testNameController.text.length),
+              onChanged: (val) {
+                _testNameController
+                  ..text = val
+                  ..selection = TextSelection.collapsed(
+                      offset: _testNameController.text.length);
+                BlocProvider.of<CreateTestBloc>(context).add(
+                    TestNameChangeEvent(
+                        testName: _testNameController.text,
+                        topics: widget.topics));
+              },
               //  validator: (val) => isPhoneNumberValid(val) ? null : null,
               obscureText: false,
               decoration: const InputDecoration.collapsed(
@@ -168,7 +243,6 @@ class _TopicListState extends State<TopicList> {
   @override
   Widget build(BuildContext context) {
     List<Topic> topics = widget.topics;
-    debugPrint('build ${topics[0].topicCheckboxValue}');
     return ListView.builder(
       shrinkWrap: true,
       itemCount: topics.length,
@@ -179,7 +253,7 @@ class _TopicListState extends State<TopicList> {
         minLeadingWidth: 0,
         child: ExpansionTile(
           title: Text(topics[index].topicName!),
-          leading: Container(
+          leading: SizedBox(
             width: MediaQuery.of(context).size.width * 0.1,
             child: CheckboxListTile(
                 value: topics[index].topicCheckboxValue,
@@ -189,7 +263,6 @@ class _TopicListState extends State<TopicList> {
                 onChanged: (value) {
                   topics[index].topicCheckboxValue =
                       !topics[index].topicCheckboxValue;
-                  debugPrint('checkvalue ${topics[index].topicCheckboxValue}');
                   if (topics[index].topicCheckboxValue == true) {
                     for (var concept in topics[index].concepts!) {
                       concept.conceptCheckboxValue = true;

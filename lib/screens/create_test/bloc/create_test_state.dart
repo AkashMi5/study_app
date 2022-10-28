@@ -28,6 +28,16 @@ class CheckboxValueChangedState extends CreateTestState {
   List<Object> get props => [topics];
 }
 
+class TestNameChangeState extends CreateTestState {
+  TestNameChangeState({required this.testName, required this.topics});
+
+  final String testName;
+  final List<Topic> topics;
+
+  @override
+  List<Object> get props => [testName, topics];
+}
+
 class CreateTestErrorState extends CreateTestState {
   CreateTestErrorState(this.errorMessage);
 

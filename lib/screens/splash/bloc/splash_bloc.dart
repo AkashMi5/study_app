@@ -16,7 +16,6 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
             emit(SplashErrorState(e.toString()));
           }
         } else if (event is SplashNavigateToOtherScreenEvent) {
-          debugPrint('navigate');
           emit(SplashNavigateToOtherScreenState(isUserLoggedin: false));
         } else {
           emit(SplashErrorState('Something went wrong!'));

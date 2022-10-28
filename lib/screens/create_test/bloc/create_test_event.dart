@@ -25,3 +25,13 @@ class CheckboxValueChangedEvent extends CreateTestEvent {
   @override
   List<Object> get props => [topics];
 }
+
+class TestNameChangeEvent extends CreateTestEvent {
+  TestNameChangeEvent({required this.testName, required this.topics});
+
+  final String testName;
+  final List<Topic> topics;
+
+  @override
+  List<Object> get props => [testName, topics];
+}

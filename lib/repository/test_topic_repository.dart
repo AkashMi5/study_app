@@ -5,7 +5,6 @@ import 'dart:convert';
 import 'package:study_app/screens/create_test/models/topics.dart';
 
 class TestTopicRepository {
-  ///first api called in preKyc module to fetch all the preKyc status and show them on home screen
   Future<dynamic> getTopics() async {
     List<Topic> topics = [];
 
@@ -22,8 +21,6 @@ class TestTopicRepository {
 
       var map = jsonDecode(response.body);
       map.forEach((e) => topics.add(Topic.fromJson(e)));
-      debugPrint(topics[0].topicName);
-      //  topics = Topic.fromJson(map);
       return topics;
     } catch (e, error) {
       debugPrint(error.toString());
